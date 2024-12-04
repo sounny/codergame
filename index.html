@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Web Programming Quiz Game</title>
+    <style>
+        /* CSS styles go here */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            transition: background-color 0.5s;
+        }
+
+        h1, h2, h3 {
+            text-align: center;
+        }
+
+        #game-container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        #teams-container {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 20px;
+        }
+
+        .team {
+            width: 45%;
+        }
+
+        button {
+            display: block;
+            margin: 20px auto;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        #score-board {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 20px;
+        }
+
+        @keyframes flash-orange {
+            0% { background-color: white; }
+            50% { background-color: orange; }
+            100% { background-color: white; }
+        }
+
+        @keyframes flash-blue {
+            0% { background-color: white; }
+            50% { background-color: blue; }
+            100% { background-color: white; }
+        }
+
+        @keyframes flash-both {
+            0% { background-color: white; }
+            33% { background-color: orange; }
+            66% { background-color: blue; }
+            100% { background-color: white; }
+        }
+
+        @keyframes flash-none {
+            0% { background-color: white; }
+            50% { background-color: grey; }
+            100% { background-color: white; }
+        }
+
+        .flash-orange {
+            animation: flash-orange 1s;
+        }
+
+        .flash-blue {
+            animation: flash-blue 1s;
+        }
+
+        .flash-both {
+            animation: flash-both 1s;
+        }
+
+        .flash-none {
+            animation: flash-none 1s;
+        }
+
+        label {
+            margin-left: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div id="game-container">
+        <!-- Start Screen -->
+        <div id="start-screen">
+            <h1>Welcome to the Web Programming Quiz Game!</h1>
+            <button id="start-button">Start Game</button>
+        </div>
+
+        <!-- Question Screen -->
+        <div id="question-screen" style="display: none;">
+            <h2 id="question-text">Question text goes here</h2>
+
+            <!-- Score Board -->
+            <div id="score-board">
+                <p>Orange Team Score: <span id="orange-score">0</span></p>
+                <p>Blue Team Score: <span id="blue-score">0</span></p>
+            </div>
+
+            <!-- Teams Container -->
+            <div id="teams-container">
+                <!-- Orange Team -->
+                <div class="team" id="orange-team">
+                    <h3>Orange Team</h3>
+                    <div id="orange-options">
+                        <!-- Options for Orange Team -->
+                    </div>
+                </div>
+
+                <!-- Blue Team -->
+                <div class="team" id="blue-team">
+                    <h3>Blue Team</h3>
+                    <div id="blue-options">
+                        <!-- Options for Blue Team -->
+                    </div>
+                </div>
+            </div>
+            <button id="submit-button">Submit Answers</button>
+        </div>
+    </div>
+
+    <script>
+        // JavaScript code goes here
+        var questions = [
+            {
+                question: "What is GitHub?",
+                options: [
+                    "A code editor",
+                    "A web hosting service for version control using Git",
+                    "An operating system",
+                    "A database management system"
+                ],
+                answer: 1
+            },
+            {
+                question: "What is the purpose of index.html?",
+                options: [
+                    "It is the default file that loads when a website is accessed",
+                    "It is a file that indexes all the images on a website",
+                    "It is used to store website metadata",
+                    "It is a file containing website search functionality"
+                ],
+                answer: 0
+            },
+            {
+                question: "What does CSS stand for?",
+                options: [
+                    "Computer Style Sheet",
+                    "Cascading Style Sheets",
+                    "Creative Style System",
+                    "Colorful Style Scripts"
+                ],
+                answer: 1
+            },
+            {
+                question: "What does JavaScript (JS) primarily do in web development?",
+                options: [
+                    "Defines the structure of web content",
+                    "Styles the web content",
+                    "Adds interactivity to web pages",
+                    "Hosts web pages"
+                ],
+                answer: 2
+            },
+            {
+                question: "Which HTML tag is used to create a hyperlink?",
+                options: [
+                    "<link>",
+                    "<a>",
+                    "<href>",
+                    "<hyperlink>"
+                ],
+                answer: 1
+            },
+            {
+                question: "In CSS, which property is used to change the background color?",
+                options: [
+                    "color",
+                    "bgcolor",
+                    "background-color",
+                    "backgroundStyle"
+                ],
+                answer: 2
+            },
+            {
+                question: "Which HTML tag is used to insert an image?",
+                options: [
+                    "<img>",
+                    "<picture>",
+                    "<image>",
+                    "<src>"
+                ],
+                answer: 0
+            },
+            {
+                question: "In JavaScript, which symbol is used for single-line comments?",
+                options: [
+                    "//",
+                    "*",
+                    "<!--",
+                    "#"
+                ],
+                answer: 0
+            },
+            {
+                question: "What is the correct way to link a CSS file to an HTML document?",
+                options: [
+                    "<style src='style.css'>",
+                    "<link rel='stylesheet' href='style.css'>",
+                    "<script src='style.css'></script>",
+                    "@import 'style.css';"
+                ],
+                answer: 1
+            },
+            {
+                question: "Which HTML element is used to define the largest heading?",
+                options: [
+                    "<heading>",
+                    "<h1>",
+                    "<head>",
+                    "<h6>"
+                ],
+                answer: 1
+            }
+        ];
+
+        var currentQuestion = 0;
+        var orangeScore = 0;
+        var blueScore = 0;
+
+        document.getElementById('start-button').addEventListener('click', startGame);
+
+        function startGame() {
+            document.getElementById('start-screen').style.display = 'none';
+            showQuestion();
+        }
+
+        function showQuestion() {
+            // Get the current question
+            var q = questions[currentQuestion];
+
+            // Update the question text
+            document.getElementById('question-text').innerText = q.question;
+
+            // Clear previous options
+            var orangeOptionsDiv = document.getElementById('orange-options');
+            orangeOptionsDiv.innerHTML = '';
+            var blueOptionsDiv = document.getElementById('blue-options');
+            blueOptionsDiv.innerHTML = '';
+
+            // Generate options for each team
+            for (var i = 0; i < q.options.length; i++) {
+                // For Orange Team
+                var orangeOption = document.createElement('div');
+                var orangeInput = document.createElement('input');
+                orangeInput.type = 'radio';
+                orangeInput.name = 'orange-answer';
+                orangeInput.value = i;
+                orangeInput.id = 'orange-option-' + i;
+                var orangeLabel = document.createElement('label');
+                orangeLabel.htmlFor = 'orange-option-' + i;
+                orangeLabel.innerText = q.options[i];
+                orangeOption.appendChild(orangeInput);
+                orangeOption.appendChild(orangeLabel);
+                orangeOptionsDiv.appendChild(orangeOption);
+
+                // For Blue Team
+                var blueOption = document.createElement('div');
+                var blueInput = document.createElement('input');
+                blueInput.type = 'radio';
+                blueInput.name = 'blue-answer';
+                blueInput.value = i;
+                blueInput.id = 'blue-option-' + i;
+                var blueLabel = document.createElement('label');
+                blueLabel.htmlFor = 'blue-option-' + i;
+                blueLabel.innerText = q.options[i];
+                blueOption.appendChild(blueInput);
+                blueOption.appendChild(blueLabel);
+                blueOptionsDiv.appendChild(blueOption);
+            }
+
+            // Show the question screen
+            document.getElementById('question-screen').style.display = 'block';
+        }
+
+        document.getElementById('submit-button').addEventListener('click', submitAnswers);
+
+        function submitAnswers() {
+            var q = questions[currentQuestion];
+
+            // Get Orange Team's answer
+            var orangeAnswer = document.querySelector('input[name="orange-answer"]:checked');
+            var orangeSelected = orangeAnswer ? parseInt(orangeAnswer.value) : null;
+
+            // Get Blue Team's answer
+            var blueAnswer = document.querySelector('input[name="blue-answer"]:checked');
+            var blueSelected = blueAnswer ? parseInt(blueAnswer.value) : null;
+
+            // Check answers and update scores
+            var orangeCorrect = false;
+            var blueCorrect = false;
+
+            if (orangeSelected === q.answer) {
+                orangeScore++;
+                orangeCorrect = true;
+            }
+
+            if (blueSelected === q.answer) {
+                blueScore++;
+                blueCorrect = true;
+            }
+
+            // Update score display
+            document.getElementById('orange-score').innerText = orangeScore;
+            document.getElementById('blue-score').innerText = blueScore;
+
+            // Show flashing effect
+            if (orangeCorrect && blueCorrect) {
+                flashScreen('both');
+            } else if (orangeCorrect) {
+                flashScreen('orange');
+            } else if (blueCorrect) {
+                flashScreen('blue');
+            } else {
+                flashScreen('none');
+            }
+
+            // Proceed to next question or end game
+            currentQuestion++;
+            if (currentQuestion < questions.length) {
+                // Show next question after a delay
+                setTimeout(function() {
+                    showQuestion();
+                }, 2000);
+            } else {
+                // End game
+                setTimeout(function() {
+                    endGame();
+                }, 2000);
+            }
+        }
+
+        function flashScreen(team) {
+            var body = document.body;
+            if (team === 'orange') {
+                body.classList.add('flash-orange');
+            } else if (team === 'blue') {
+                body.classList.add('flash-blue');
+            } else if (team === 'both') {
+                body.classList.add('flash-both');
+            } else {
+                body.classList.add('flash-none');
+            }
+
+            // Remove the flash class after a short duration
+            setTimeout(function() {
+                body.classList.remove('flash-orange', 'flash-blue', 'flash-both', 'flash-none');
+            }, 1000);
+        }
+
+        function endGame() {
+            // Hide the question screen
+            document.getElementById('question-screen').style.display = 'none';
+
+            // Display final scores and declare the winner
+            var resultDiv = document.createElement('div');
+            resultDiv.id = 'result-screen';
+            var resultHtml = '<h2>Game Over!</h2>';
+            resultHtml += '<p>Orange Team Score: ' + orangeScore + '</p>';
+            resultHtml += '<p>Blue Team Score: ' + blueScore + '</p>';
+
+            if (orangeScore > blueScore) {
+                resultHtml += '<h2>The Orange Team Wins!</h2>';
+            } else if (blueScore > orangeScore) {
+                resultHtml += '<h2>The Blue Team Wins!</h2>';
+            } else {
+                resultHtml += '<h2>It\'s a Tie!</h2>';
+            }
+
+            resultHtml += '<button id="restart-button">Play Again</button>';
+
+            resultDiv.innerHTML = resultHtml;
+            document.getElementById('game-container').appendChild(resultDiv);
+
+            // Add event listener to restart button
+            document.getElementById('restart-button').addEventListener('click', function() {
+                // Reset game variables
+                currentQuestion = 0;
+                orangeScore = 0;
+                blueScore = 0;
+
+                // Remove result screen
+                resultDiv.parentNode.removeChild(resultDiv);
+
+                // Reset score display
+                document.getElementById('orange-score').innerText = orangeScore;
+                document.getElementById('blue-score').innerText = blueScore;
+
+                // Start game again
+                showQuestion();
+            });
+        }
+    </script>
+</body>
+</html>
