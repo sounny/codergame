@@ -203,7 +203,7 @@
     <canvas id="confetti-canvas"></canvas>
 
     <script>
-        // JavaScript code with confetti effect and modernized UI
+        // JavaScript code with enhanced confetti effect
         var questions = [
             {
                 question: "What is GitHub?",
@@ -477,43 +477,40 @@
                 showQuestion();
             });
 
-            // Start confetti effect if there's a winner
+            // Start enhanced confetti effect if there's a winner
             if (orangeScore !== blueScore) {
                 startConfetti();
             }
         }
 
-        // Confetti effect
+        // Enhanced Confetti effect
         function startConfetti() {
-            var duration = 5 * 1000;
-            var end = Date.now() + duration;
+            var duration = 7 * 1000; // Confetti duration in milliseconds
+            var animationEnd = Date.now() + duration;
+            var defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 2000 };
 
-            var colors = ['#FFA500', '#1E90FF', '#FF4500', '#00BFFF', '#FFD700'];
+            function randomInRange(min, max) {
+                return Math.random() * (max - min) + min;
+            }
 
-            (function frame() {
-                confetti({
-                    particleCount: 5,
-                    angle: 60,
-                    spread: 55,
-                    origin: { x: 0 },
-                    colors: colors
-                });
-                confetti({
-                    particleCount: 5,
-                    angle: 120,
-                    spread: 55,
-                    origin: { x: 1 },
-                    colors: colors
-                });
+            var interval = setInterval(function() {
+                var timeLeft = animationEnd - Date.now();
 
-                if (Date.now() < end) {
-                    requestAnimationFrame(frame);
+                if (timeLeft <= 0) {
+                    return clearInterval(interval);
                 }
-            }());
+
+                var particleCount = 50 * (timeLeft / duration);
+
+                // Since particles fall down, start a bit higher than random
+                confetti(Object.assign({}, defaults, {
+                    particleCount,
+                    origin: { x: randomInRange(0, 1), y: Math.random() - 0.2 }
+                }));
+            }, 250);
         }
 
-        // Confetti.js code
-        // Confetti function (simplified for this example)
+        // Confetti.js code (simplified inline version)
         (function() {
             var confetti = function(params) {
                 var canvas = document.getElementById('confetti-canvas');
@@ -522,56 +519,64 @@
                 canvas.height = window.innerHeight;
 
                 var particles = [];
-                for (var i = 0; i < params.particleCount; i++) {
+                var particleCount = params.particleCount || 100;
+                var colors = params.colors || ['#FFA500', '#1E90FF', '#FF4500', '#00BFFF', '#FFD700'];
+
+                for (var i = 0; i < particleCount; i++) {
                     particles.push({
                         x: Math.random() * canvas.width,
                         y: Math.random() * canvas.height - canvas.height,
-                        r: Math.random() * 6 + 4,
-                        d: (Math.random() * params.spread) + 10,
-                        color: params.colors[Math.floor(Math.random() * params.colors.length)],
+                        r: Math.random() * 4 + 1,
+                        d: Math.random() * params.ticks,
+                        color: colors[Math.floor(Math.random() * colors.length)],
                         tilt: Math.floor(Math.random() * 10) - 10,
                         tiltAngleIncremental: (Math.random() * 0.07) + 0.05,
-                        tiltAngle: 0
+                        tiltAngle: Math.random() * Math.PI,
+                        speed: Math.random() * 3 + 2
                     });
                 }
 
+                var animationFrame;
+
                 (function draw() {
                     ctx.clearRect(0, 0, canvas.width, canvas.height);
-                    for (var i = 0; i < particles.length; i++) {
-                        var p = particles[i];
+
+                    particles.forEach(function(particle, index) {
+                        particle.tiltAngle += particle.tiltAngleIncremental;
+                        particle.y += (Math.cos(particle.d) + particle.speed);
+                        particle.x += Math.sin(0.01 * particle.d);
+
+                        particle.tilt = Math.sin(particle.tiltAngle) * 15;
+
                         ctx.beginPath();
-                        ctx.lineWidth = p.r / 2;
-                        ctx.strokeStyle = p.color;
-                        ctx.moveTo(p.x + p.tilt + (p.r / 4), p.y);
-                        ctx.lineTo(p.x + p.tilt, p.y + p.tilt + (p.r / 4));
+                        ctx.lineWidth = particle.r;
+                        ctx.strokeStyle = particle.color;
+                        ctx.moveTo(particle.x + particle.tilt + particle.r / 2, particle.y);
+                        ctx.lineTo(particle.x + particle.tilt, particle.y + particle.tilt + particle.r / 2);
                         ctx.stroke();
-                    }
 
-                    update();
-                    requestAnimationFrame(draw);
-                }());
-
-                function update() {
-                    for (var i = 0; i < particles.length; i++) {
-                        var p = particles[i];
-                        p.tiltAngle += p.tiltAngleIncremental;
-                        p.y += (Math.cos(p.d) + 3 + p.r / 2) / 2;
-                        p.tilt = Math.sin(p.tiltAngle - (i / 3)) * 15;
-
-                        if (p.y > canvas.height) {
-                            particles[i] = {
+                        if (particle.y > canvas.height) {
+                            particles[index] = {
                                 x: Math.random() * canvas.width,
                                 y: -20,
-                                r: p.r,
-                                d: p.d,
-                                color: p.color,
-                                tilt: p.tilt,
-                                tiltAngleIncremental: p.tiltAngleIncremental,
-                                tiltAngle: p.tiltAngle
+                                r: particle.r,
+                                d: particle.d,
+                                color: particle.color,
+                                tilt: particle.tilt,
+                                tiltAngleIncremental: particle.tiltAngleIncremental,
+                                tiltAngle: particle.tiltAngle,
+                                speed: particle.speed
                             };
                         }
-                    }
-                }
+                    });
+
+                    animationFrame = requestAnimationFrame(draw);
+                })();
+
+                setTimeout(function() {
+                    cancelAnimationFrame(animationFrame);
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                }, params.ticks * 50);
             };
 
             window.confetti = confetti;
