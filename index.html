@@ -4,21 +4,25 @@
     <meta charset="UTF-8">
     <title>Web Programming Quiz Game</title>
     <style>
-        /* CSS styles go here */
+        /* Modern CSS styles */
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Roboto', sans-serif;
             margin: 0;
-            padding: 20px;
+            padding: 0;
+            background-color: #f5f7fa;
+            color: #333;
             transition: background-color 0.5s;
         }
 
         h1, h2, h3 {
             text-align: center;
+            font-weight: 300;
         }
 
         #game-container {
             max-width: 800px;
             margin: 0 auto;
+            padding: 20px;
         }
 
         #teams-container {
@@ -29,14 +33,27 @@
 
         .team {
             width: 45%;
+            background-color: #fff;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
         }
 
         button {
             display: block;
-            margin: 20px auto;
-            padding: 10px 20px;
-            font-size: 16px;
+            margin: 30px auto;
+            padding: 15px 30px;
+            font-size: 18px;
             cursor: pointer;
+            border: none;
+            border-radius: 50px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #fff;
+            transition: background 0.3s;
+        }
+
+        button:hover {
+            background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
         }
 
         #score-board {
@@ -45,29 +62,53 @@
             margin-top: 20px;
         }
 
+        .score {
+            font-size: 20px;
+            font-weight: 500;
+        }
+
+        .option-label {
+            display: block;
+            background-color: #f1f3f7;
+            padding: 10px;
+            margin: 8px 0;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .option-label:hover {
+            background-color: #e2e6ea;
+        }
+
+        input[type="radio"] {
+            display: none;
+        }
+
+        /* Flashing animations */
         @keyframes flash-orange {
-            0% { background-color: white; }
-            50% { background-color: orange; }
-            100% { background-color: white; }
+            0% { background-color: #f5f7fa; }
+            50% { background-color: #FFA500; }
+            100% { background-color: #f5f7fa; }
         }
 
         @keyframes flash-blue {
-            0% { background-color: white; }
-            50% { background-color: blue; }
-            100% { background-color: white; }
+            0% { background-color: #f5f7fa; }
+            50% { background-color: #1E90FF; }
+            100% { background-color: #f5f7fa; }
         }
 
         @keyframes flash-both {
-            0% { background-color: white; }
-            33% { background-color: orange; }
-            66% { background-color: blue; }
-            100% { background-color: white; }
+            0% { background-color: #f5f7fa; }
+            33% { background-color: #FFA500; }
+            66% { background-color: #1E90FF; }
+            100% { background-color: #f5f7fa; }
         }
 
         @keyframes flash-none {
-            0% { background-color: white; }
-            50% { background-color: grey; }
-            100% { background-color: white; }
+            0% { background-color: #f5f7fa; }
+            50% { background-color: #d3d3d3; }
+            100% { background-color: #f5f7fa; }
         }
 
         .flash-orange {
@@ -86,8 +127,15 @@
             animation: flash-none 1s;
         }
 
-        label {
-            margin-left: 5px;
+        /* Confetti canvas */
+        #confetti-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 9999;
         }
     </style>
 </head>
@@ -105,8 +153,8 @@
 
             <!-- Score Board -->
             <div id="score-board">
-                <p>Orange Team Score: <span id="orange-score">0</span></p>
-                <p>Blue Team Score: <span id="blue-score">0</span></p>
+                <p class="score">🟠 Orange Team: <span id="orange-score">0</span></p>
+                <p class="score">🔵 Blue Team: <span id="blue-score">0</span></p>
             </div>
 
             <!-- Teams Container -->
@@ -131,8 +179,11 @@
         </div>
     </div>
 
+    <!-- Confetti Canvas -->
+    <canvas id="confetti-canvas"></canvas>
+
     <script>
-        // JavaScript code goes here
+        // JavaScript code with confetti effect and modernized UI
         var questions = [
             {
                 question: "What is GitHub?",
@@ -177,10 +228,10 @@
             {
                 question: "Which HTML tag is used to create a hyperlink?",
                 options: [
-                    "<link>",
-                    "<a>",
-                    "<href>",
-                    "<hyperlink>"
+                    "&lt;link&gt;",
+                    "&lt;a&gt;",
+                    "&lt;href&gt;",
+                    "&lt;hyperlink&gt;"
                 ],
                 answer: 1
             },
@@ -197,10 +248,10 @@
             {
                 question: "Which HTML tag is used to insert an image?",
                 options: [
-                    "<img>",
-                    "<picture>",
-                    "<image>",
-                    "<src>"
+                    "&lt;img&gt;",
+                    "&lt;picture&gt;",
+                    "&lt;image&gt;",
+                    "&lt;src&gt;"
                 ],
                 answer: 0
             },
@@ -209,7 +260,7 @@
                 options: [
                     "//",
                     "*",
-                    "<!--",
+                    "&lt;!--",
                     "#"
                 ],
                 answer: 0
@@ -217,9 +268,9 @@
             {
                 question: "What is the correct way to link a CSS file to an HTML document?",
                 options: [
-                    "<style src='style.css'>",
-                    "<link rel='stylesheet' href='style.css'>",
-                    "<script src='style.css'></script>",
+                    "&lt;style src='style.css'&gt;",
+                    "&lt;link rel='stylesheet' href='style.css'&gt;",
+                    "&lt;script src='style.css'&gt;&lt;/script&gt;",
                     "@import 'style.css';"
                 ],
                 answer: 1
@@ -227,10 +278,10 @@
             {
                 question: "Which HTML element is used to define the largest heading?",
                 options: [
-                    "<heading>",
-                    "<h1>",
-                    "<head>",
-                    "<h6>"
+                    "&lt;heading&gt;",
+                    "&lt;h1&gt;",
+                    "&lt;head&gt;",
+                    "&lt;h6&gt;"
                 ],
                 answer: 1
             }
@@ -248,19 +299,14 @@
         }
 
         function showQuestion() {
-            // Get the current question
             var q = questions[currentQuestion];
-
-            // Update the question text
             document.getElementById('question-text').innerText = q.question;
 
-            // Clear previous options
             var orangeOptionsDiv = document.getElementById('orange-options');
             orangeOptionsDiv.innerHTML = '';
             var blueOptionsDiv = document.getElementById('blue-options');
             blueOptionsDiv.innerHTML = '';
 
-            // Generate options for each team
             for (var i = 0; i < q.options.length; i++) {
                 // For Orange Team
                 var orangeOption = document.createElement('div');
@@ -269,9 +315,12 @@
                 orangeInput.name = 'orange-answer';
                 orangeInput.value = i;
                 orangeInput.id = 'orange-option-' + i;
+
                 var orangeLabel = document.createElement('label');
                 orangeLabel.htmlFor = 'orange-option-' + i;
-                orangeLabel.innerText = q.options[i];
+                orangeLabel.innerHTML = q.options[i];
+                orangeLabel.classList.add('option-label');
+
                 orangeOption.appendChild(orangeInput);
                 orangeOption.appendChild(orangeLabel);
                 orangeOptionsDiv.appendChild(orangeOption);
@@ -283,15 +332,17 @@
                 blueInput.name = 'blue-answer';
                 blueInput.value = i;
                 blueInput.id = 'blue-option-' + i;
+
                 var blueLabel = document.createElement('label');
                 blueLabel.htmlFor = 'blue-option-' + i;
-                blueLabel.innerText = q.options[i];
+                blueLabel.innerHTML = q.options[i];
+                blueLabel.classList.add('option-label');
+
                 blueOption.appendChild(blueInput);
                 blueOption.appendChild(blueLabel);
                 blueOptionsDiv.appendChild(blueOption);
             }
 
-            // Show the question screen
             document.getElementById('question-screen').style.display = 'block';
         }
 
@@ -300,15 +351,12 @@
         function submitAnswers() {
             var q = questions[currentQuestion];
 
-            // Get Orange Team's answer
             var orangeAnswer = document.querySelector('input[name="orange-answer"]:checked');
             var orangeSelected = orangeAnswer ? parseInt(orangeAnswer.value) : null;
 
-            // Get Blue Team's answer
             var blueAnswer = document.querySelector('input[name="blue-answer"]:checked');
             var blueSelected = blueAnswer ? parseInt(blueAnswer.value) : null;
 
-            // Check answers and update scores
             var orangeCorrect = false;
             var blueCorrect = false;
 
@@ -322,11 +370,9 @@
                 blueCorrect = true;
             }
 
-            // Update score display
             document.getElementById('orange-score').innerText = orangeScore;
             document.getElementById('blue-score').innerText = blueScore;
 
-            // Show flashing effect
             if (orangeCorrect && blueCorrect) {
                 flashScreen('both');
             } else if (orangeCorrect) {
@@ -337,15 +383,12 @@
                 flashScreen('none');
             }
 
-            // Proceed to next question or end game
             currentQuestion++;
             if (currentQuestion < questions.length) {
-                // Show next question after a delay
                 setTimeout(function() {
                     showQuestion();
                 }, 2000);
             } else {
-                // End game
                 setTimeout(function() {
                     endGame();
                 }, 2000);
@@ -364,31 +407,37 @@
                 body.classList.add('flash-none');
             }
 
-            // Remove the flash class after a short duration
             setTimeout(function() {
                 body.classList.remove('flash-orange', 'flash-blue', 'flash-both', 'flash-none');
             }, 1000);
         }
 
         function endGame() {
-            // Hide the question screen
             document.getElementById('question-screen').style.display = 'none';
 
-            // Display final scores and declare the winner
             var resultDiv = document.createElement('div');
             resultDiv.id = 'result-screen';
+            resultDiv.style.textAlign = 'center';
+
             var resultHtml = '<h2>Game Over!</h2>';
-            resultHtml += '<p>Orange Team Score: ' + orangeScore + '</p>';
-            resultHtml += '<p>Blue Team Score: ' + blueScore + '</p>';
+            resultHtml += '<p class="score">🟠 Orange Team: ' + orangeScore + '</p>';
+            resultHtml += '<p class="score">🔵 Blue Team: ' + blueScore + '</p>';
+
+            var winnerText = '';
+            var winnerColor = '';
 
             if (orangeScore > blueScore) {
-                resultHtml += '<h2>The Orange Team Wins!</h2>';
+                winnerText = 'The Orange Team Wins!';
+                winnerColor = '#FFA500';
             } else if (blueScore > orangeScore) {
-                resultHtml += '<h2>The Blue Team Wins!</h2>';
+                winnerText = 'The Blue Team Wins!';
+                winnerColor = '#1E90FF';
             } else {
-                resultHtml += '<h2>It\'s a Tie!</h2>';
+                winnerText = 'It\'s a Tie!';
+                winnerColor = '#808080';
             }
 
+            resultHtml += '<h2 style="color: ' + winnerColor + ';">' + winnerText + '</h2>';
             resultHtml += '<button id="restart-button">Play Again</button>';
 
             resultDiv.innerHTML = resultHtml;
@@ -396,22 +445,117 @@
 
             // Add event listener to restart button
             document.getElementById('restart-button').addEventListener('click', function() {
-                // Reset game variables
                 currentQuestion = 0;
                 orangeScore = 0;
                 blueScore = 0;
 
-                // Remove result screen
                 resultDiv.parentNode.removeChild(resultDiv);
 
-                // Reset score display
                 document.getElementById('orange-score').innerText = orangeScore;
                 document.getElementById('blue-score').innerText = blueScore;
 
-                // Start game again
                 showQuestion();
             });
+
+            // Start confetti effect if there's a winner
+            if (orangeScore !== blueScore) {
+                startConfetti();
+            }
         }
+
+        // Confetti effect
+        function startConfetti() {
+            var duration = 5 * 1000;
+            var end = Date.now() + duration;
+
+            var colors = ['#FFA500', '#1E90FF', '#FF4500', '#00BFFF', '#FFD700'];
+
+            (function frame() {
+                confetti({
+                    particleCount: 5,
+                    angle: 60,
+                    spread: 55,
+                    origin: { x: 0 },
+                    colors: colors
+                });
+                confetti({
+                    particleCount: 5,
+                    angle: 120,
+                    spread: 55,
+                    origin: { x: 1 },
+                    colors: colors
+                });
+
+                if (Date.now() < end) {
+                    requestAnimationFrame(frame);
+                }
+            }());
+        }
+
+        // Confetti.js code
+        // Confetti function (simplified for this example)
+        (function() {
+            var confetti = function(params) {
+                var canvas = document.getElementById('confetti-canvas');
+                var ctx = canvas.getContext('2d');
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+
+                var particles = [];
+                for (var i = 0; i < params.particleCount; i++) {
+                    particles.push({
+                        x: Math.random() * canvas.width,
+                        y: Math.random() * canvas.height - canvas.height,
+                        r: Math.random() * 6 + 4,
+                        d: (Math.random() * params.spread) + 10,
+                        color: params.colors[Math.floor(Math.random() * params.colors.length)],
+                        tilt: Math.floor(Math.random() * 10) - 10,
+                        tiltAngleIncremental: (Math.random() * 0.07) + 0.05,
+                        tiltAngle: 0
+                    });
+                }
+
+                (function draw() {
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    for (var i = 0; i < particles.length; i++) {
+                        var p = particles[i];
+                        ctx.beginPath();
+                        ctx.lineWidth = p.r / 2;
+                        ctx.strokeStyle = p.color;
+                        ctx.moveTo(p.x + p.tilt + (p.r / 4), p.y);
+                        ctx.lineTo(p.x + p.tilt, p.y + p.tilt + (p.r / 4));
+                        ctx.stroke();
+                    }
+
+                    update();
+                    requestAnimationFrame(draw);
+                }());
+
+                function update() {
+                    for (var i = 0; i < particles.length; i++) {
+                        var p = particles[i];
+                        p.tiltAngle += p.tiltAngleIncremental;
+                        p.y += (Math.cos(p.d) + 3 + p.r / 2) / 2;
+                        p.tilt = Math.sin(p.tiltAngle - (i / 3)) * 15;
+
+                        if (p.y > canvas.height) {
+                            particles[i] = {
+                                x: Math.random() * canvas.width,
+                                y: -20,
+                                r: p.r,
+                                d: p.d,
+                                color: p.color,
+                                tilt: p.tilt,
+                                tiltAngleIncremental: p.tiltAngleIncremental,
+                                tiltAngle: p.tiltAngle
+                            };
+                        }
+                    }
+                }
+            };
+
+            window.confetti = confetti;
+        })();
     </script>
 </body>
 </html>
